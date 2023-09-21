@@ -65,10 +65,12 @@ input RemoveMenuFromCartInput {
 }
 
 type SignUpOutput {
+  id : String!
   token : String!
 }
 
 type SignInOutput {
+  id : String!
   token : String!
 }
 

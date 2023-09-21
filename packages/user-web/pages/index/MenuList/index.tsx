@@ -1,13 +1,14 @@
-import { Spacer } from "components/Spacer";
-import Image from "next/image";
-import { Menu } from "pages/index/types";
-import React from "react";
-import styled from "styled-components";
-import { formatPrice } from "util/formatPrice";
-
-import { Badge, IconButton, Typography } from "@material-ui/core";
+import React, { useState } from "react";
 import { CartItem } from "hooks/useCartItems/types";
-import { Add, Remove } from "@material-ui/icons";
+import { useAuth } from "hooks/useAuth";
+
+import { Menu } from "pages/index/types";
+import { formatPrice } from "util/formatPrice";
+import styled from "styled-components";
+import Image from "next/image";
+import { Badge, Typography, Modal, Divider } from "@material-ui/core";
+import { Add, Remove, Visibility, Star } from "@material-ui/icons";
+import { Spacer } from "components/Spacer";
 
 const Container = styled.div`
   display: flex;
@@ -38,7 +39,7 @@ const CardActions = styled.div`
   height: 100%;
   display: flex;
   align-items: flex-end;
-  justify-content: flex-end;
+  justify-content: space-between;
   position: absolute;
   padding: ${({ theme }) => theme.spacing(1)}px;
   color: ${({ theme }) => theme.palette.common.white};
@@ -48,8 +49,8 @@ const CartActionButton = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   background: rgba(128, 128, 128, 0.5);
 `;
@@ -62,6 +63,23 @@ const Description = styled.div`
   display: flex;
   justify-content: space-between;
 `;
+const Rating = styled.span`
+  border: 1px solid yellow;
+  color: yellow;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+`
+const Reviews = styled.div`
+  width: 200px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  background-color: white;
+  border: 1px solid black;
+`
 
 type Props = {
   menus: Menu[];
@@ -70,11 +88,43 @@ type Props = {
   onRemove: (menuId: string) => void;
 };
 
+type ReviewListProps = {
+  reviews: Array<{ comment: string, createdAt: string, rating: number, user: { name: string, id: string } } | null>,
+  close: () => void
+}
+
+
+const ReviewList = ({ reviews, close }: ReviewListProps) => {
+
+  if (reviews.length == 0) return <>No reviews yet</>
+  return (
+    <Reviews>
+      <button onClick={close}>Close</button>
+      {reviews.map((review) => (
+        <>
+          <div>{review?.user.name}</div>
+          <div>{review?.comment}</div>
+          <div>{review?.rating}</div>
+        </>
+      ))}
+    </Reviews>
+  )
+}
+
 export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
-  const cartCountMap = cartItems.reduce((acc, { menuId, quantity }) => {
+  const userId = useAuth().userId;
+  const cartCountMap = cartItems.reduce((acc, { menuId, quantity, addedUserId }) => {
+    if (addedUserId !== userId) return acc;
     acc[menuId] = (acc[menuId] ?? 0) + quantity;
     return acc;
   }, {} as Record<string, number>);
+  const [open, setOpen] = useState(false)
+  const handleClose = () => {
+    setOpen(false)
+  }
+  const handleOpen = () => {
+    setOpen(true)
+  }
 
   return (
     <Container>
@@ -85,6 +135,10 @@ export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
               <StyledImage key={image} src={`http://localhost:3000/images/${image}`} width={160} height={160} alt={name} />
             </CardImage>
             <CardActions>
+              <CartActionButton onClick={() => handleOpen()}>
+                <Visibility />
+              </CartActionButton>
+              <Spacer size={1} />
               {cartCountMap[id] > 0 && (
                 <CartActionButton onClick={() => onRemove(id)}>
                   <Remove />
@@ -104,6 +158,7 @@ export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
           </Description>
         </Card>
       ))}
+      {open && <ReviewList reviews={[]} close={handleClose}/>}
     </Container>
   );
 };

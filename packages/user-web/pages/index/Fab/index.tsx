@@ -1,12 +1,12 @@
 import { Fab as MuiFab, Zoom } from "@material-ui/core";
 import { Navigation } from "@material-ui/icons";
 import { useRouter } from "next/dist/client/router";
-import { CartItem } from "pages/index/types";
+import { CartItem } from "hooks/useCartItems/types";
 import React from "react";
 import styled, { useTheme } from "styled-components";
 
 const StyledFab = styled(MuiFab)`
-  position: absolute;
+  position: fixed;
   bottom: ${({ theme }) => theme.spacing(2)}px;
   right: ${({ theme }) => theme.spacing(2)}px;
 `;

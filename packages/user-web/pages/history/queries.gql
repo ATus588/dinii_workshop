@@ -1,4 +1,4 @@
-subscription CartItems {
+query CartGetCartItems {
   cartItem {
     id
     menuId
@@ -8,10 +8,11 @@ subscription CartItems {
     menu {
       image
     }
-    addedUserId
-    user {
-      id
-      name
-    }
+  }
+}
+
+mutation CartOrderCartItems {
+  orderCartItems {
+    success
   }
 }

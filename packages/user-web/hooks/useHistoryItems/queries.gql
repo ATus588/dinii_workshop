@@ -1,0 +1,17 @@
+  query HistoryItems {
+    order(order_by: { orderedAt: asc }) {
+      id
+      name
+      price
+      quantity
+      user {
+        id
+        name
+      }
+      orderedAt
+      menu {
+        id
+        image
+      }
+    }
+  }

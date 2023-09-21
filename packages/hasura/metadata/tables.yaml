@@ -1,6 +1,6 @@
 - table:
-    schema: public
     name: cartItem
+    schema: public
   object_relationships:
   - name: menu
     using:
@@ -20,16 +20,16 @@
       - quantity
       filter: {}
 - table:
-    schema: public
     name: category
+    schema: public
   array_relationships:
   - name: menus
     using:
       foreign_key_constraint_on:
         column: categoryId
         table:
-          schema: public
           name: menu
+          schema: public
   select_permissions:
   - role: user
     permission:
@@ -38,8 +38,8 @@
       - name
       filter: {}
 - table:
-    schema: public
     name: menu
+    schema: public
   object_relationships:
   - name: category
     using:
@@ -50,15 +50,22 @@
       foreign_key_constraint_on:
         column: menuId
         table:
-          schema: public
           name: cartItem
+          schema: public
   - name: orders
     using:
       foreign_key_constraint_on:
         column: menuId
         table:
-          schema: public
           name: order
+          schema: public
+  - name: reviews
+    using:
+      foreign_key_constraint_on:
+        column: menuId
+        table:
+          name: reviews
+          schema: public
   select_permissions:
   - role: user
     permission:
@@ -70,8 +77,8 @@
       - image
       filter: {}
 - table:
-    schema: public
     name: order
+    schema: public
   object_relationships:
   - name: menu
     using:
@@ -92,16 +99,78 @@
       - price
       filter: {}
 - table:
+    name: reviews
     schema: public
+  object_relationships:
+  - name: menu
+    using:
+      foreign_key_constraint_on: menuId
+  - name: user
+    using:
+      foreign_key_constraint_on: userId
+  insert_permissions:
+  - role: user
+    permission:
+      check: {}
+      columns:
+      - id
+      - menuId
+      - userId
+      - rating
+      - comment
+      - createdAt
+  select_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - rating
+      - comment
+      - userId
+      - createdAt
+      - menuId
+      filter: {}
+  update_permissions:
+  - role: user
+    permission:
+      columns:
+      - id
+      - rating
+      - comment
+      - userId
+      - createdAt
+      - menuId
+      filter: {}
+      check: null
+  delete_permissions:
+  - role: user
+    permission:
+      filter: {}
+- table:
     name: user
+    schema: public
   array_relationships:
   - name: cartItems
     using:
       foreign_key_constraint_on:
         column: addedUserId
         table:
-          schema: public
           name: cartItem
+          schema: public
+  - name: orders
+    using:
+      foreign_key_constraint_on:
+        column: orderedUserId
+        table:
+          name: order
+          schema: public
+  - name: reviews
+    using:
+      foreign_key_constraint_on:
+        column: userId
+        table:
+          name: reviews
+          schema: public
   select_permissions:
   - role: user
     permission:

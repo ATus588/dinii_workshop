@@ -8,6 +8,9 @@ schema {
 directive @cached(
   """measured in seconds"""
   ttl: Int! = 60
+
+  """refresh the cache entry"""
+  refresh: Boolean! = false
 ) on QUERY
 
 input AddMenuIntoCartInput {
@@ -43,6 +46,17 @@ aggregated selection of "cartItem"
 type cartItem_aggregate {
   aggregate: cartItem_aggregate_fields
   nodes: [cartItem!]!
+}
+
+input cartItem_aggregate_bool_exp {
+  count: cartItem_aggregate_bool_exp_count
+}
+
+input cartItem_aggregate_bool_exp_count {
+  arguments: [cartItem_select_column!]
+  distinct: Boolean
+  filter: cartItem_bool_exp
+  predicate: Int_comparison_exp!
 }
 
 """
@@ -85,7 +99,7 @@ input type for inserting array relation for remote table "cartItem"
 input cartItem_arr_rel_insert_input {
   data: [cartItem_insert_input!]!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: cartItem_on_conflict
 }
 
@@ -124,7 +138,9 @@ input cartItem_bool_exp {
 unique or primary key constraints on table "cartItem"
 """
 enum cartItem_constraint {
-  """unique or primary key constraint"""
+  """
+  unique or primary key constraint on columns "id"
+  """
   cartItem_pkey
 }
 
@@ -206,7 +222,7 @@ type cartItem_mutation_response {
 }
 
 """
-on conflict condition type for table "cartItem"
+on_conflict condition type for table "cartItem"
 """
 input cartItem_on_conflict {
   constraint: cartItem_constraint!
@@ -308,6 +324,27 @@ input cartItem_stddev_samp_order_by {
   quantity: order_by
 }
 
+"""
+Streaming cursor of the table "cartItem"
+"""
+input cartItem_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: cartItem_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input cartItem_stream_cursor_value_input {
+  addedUserId: String
+  id: uuid
+  menuId: uuid
+  name: String
+  price: Int
+  quantity: Int
+}
+
 """aggregate sum on columns"""
 type cartItem_sum_fields {
   price: Int
@@ -343,6 +380,17 @@ enum cartItem_update_column {
 
   """column name"""
   quantity
+}
+
+input cartItem_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: cartItem_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: cartItem_set_input
+
+  """filter the rows which have to be updated"""
+  where: cartItem_bool_exp!
 }
 
 """aggregate var_pop on columns"""
@@ -457,6 +505,7 @@ input category_bool_exp {
   _or: [category_bool_exp!]
   id: uuid_comparison_exp
   menus: menu_bool_exp
+  menus_aggregate: menu_aggregate_bool_exp
   name: String_comparison_exp
 }
 
@@ -464,7 +513,9 @@ input category_bool_exp {
 unique or primary key constraints on table "category"
 """
 enum category_constraint {
-  """unique or primary key constraint"""
+  """
+  unique or primary key constraint on columns "id"
+  """
   category_pkey
 }
 
@@ -506,12 +557,12 @@ input type for inserting object relation for remote table "category"
 input category_obj_rel_insert_input {
   data: category_insert_input!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: category_on_conflict
 }
 
 """
-on conflict condition type for table "category"
+on_conflict condition type for table "category"
 """
 input category_on_conflict {
   constraint: category_constraint!
@@ -551,6 +602,23 @@ input category_set_input {
 }
 
 """
+Streaming cursor of the table "category"
+"""
+input category_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: category_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input category_stream_cursor_value_input {
+  id: uuid
+  name: String
+}
+
+"""
 update columns of table "category"
 """
 enum category_update_column {
@@ -559,6 +627,23 @@ enum category_update_column {
 
   """column name"""
   name
+}
+
+input category_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: category_set_input
+
+  """filter the rows which have to be updated"""
+  where: category_bool_exp!
+}
+
+"""ordering argument of a cursor"""
+enum cursor_ordering {
+  """ascending ordering of the cursor"""
+  ASC
+
+  """descending ordering of the cursor"""
+  DESC
 }
 
 """
@@ -659,6 +744,42 @@ type menu {
     where: order_bool_exp
   ): order_aggregate!
   price: Int!
+
+  """An array relationship"""
+  reviews(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): [reviews!]!
+
+  """An aggregate relationship"""
+  reviews_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): reviews_aggregate!
 }
 
 """
@@ -667,6 +788,17 @@ aggregated selection of "menu"
 type menu_aggregate {
   aggregate: menu_aggregate_fields
   nodes: [menu!]!
+}
+
+input menu_aggregate_bool_exp {
+  count: menu_aggregate_bool_exp_count
+}
+
+input menu_aggregate_bool_exp_count {
+  arguments: [menu_select_column!]
+  distinct: Boolean
+  filter: menu_bool_exp
+  predicate: Int_comparison_exp!
 }
 
 """
@@ -709,7 +841,7 @@ input type for inserting array relation for remote table "menu"
 input menu_arr_rel_insert_input {
   data: [menu_insert_input!]!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: menu_on_conflict
 }
 
@@ -733,20 +865,26 @@ input menu_bool_exp {
   _not: menu_bool_exp
   _or: [menu_bool_exp!]
   cartItems: cartItem_bool_exp
+  cartItems_aggregate: cartItem_aggregate_bool_exp
   category: category_bool_exp
   categoryId: uuid_comparison_exp
   id: uuid_comparison_exp
   image: String_comparison_exp
   name: String_comparison_exp
   orders: order_bool_exp
+  orders_aggregate: order_aggregate_bool_exp
   price: Int_comparison_exp
+  reviews: reviews_bool_exp
+  reviews_aggregate: reviews_aggregate_bool_exp
 }
 
 """
 unique or primary key constraints on table "menu"
 """
 enum menu_constraint {
-  """unique or primary key constraint"""
+  """
+  unique or primary key constraint on columns "id"
+  """
   menu_pkey
 }
 
@@ -769,6 +907,7 @@ input menu_insert_input {
   name: String
   orders: order_arr_rel_insert_input
   price: Int
+  reviews: reviews_arr_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -828,12 +967,12 @@ input type for inserting object relation for remote table "menu"
 input menu_obj_rel_insert_input {
   data: menu_insert_input!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: menu_on_conflict
 }
 
 """
-on conflict condition type for table "menu"
+on_conflict condition type for table "menu"
 """
 input menu_on_conflict {
   constraint: menu_constraint!
@@ -851,6 +990,7 @@ input menu_order_by {
   name: order_by
   orders_aggregate: order_aggregate_order_by
   price: order_by
+  reviews_aggregate: reviews_aggregate_order_by
 }
 
 """primary key columns input for table: menu"""
@@ -925,6 +1065,26 @@ input menu_stddev_samp_order_by {
   price: order_by
 }
 
+"""
+Streaming cursor of the table "menu"
+"""
+input menu_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: menu_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input menu_stream_cursor_value_input {
+  categoryId: uuid
+  id: uuid
+  image: String
+  name: String
+  price: Int
+}
+
 """aggregate sum on columns"""
 type menu_sum_fields {
   price: Int
@@ -955,6 +1115,17 @@ enum menu_update_column {
 
   """column name"""
   price
+}
+
+input menu_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: menu_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: menu_set_input
+
+  """filter the rows which have to be updated"""
+  where: menu_bool_exp!
 }
 
 """aggregate var_pop on columns"""
@@ -1050,6 +1221,19 @@ type mutation_root {
   delete_order_by_pk(id: uuid!): order
 
   """
+  delete data from the table: "reviews"
+  """
+  delete_reviews(
+    """filter the rows which have to be deleted"""
+    where: reviews_bool_exp!
+  ): reviews_mutation_response
+
+  """
+  delete single row from the table: "reviews"
+  """
+  delete_reviews_by_pk(id: Int!): reviews
+
+  """
   delete data from the table: "user"
   """
   delete_user(
@@ -1069,7 +1253,7 @@ type mutation_root {
     """the rows to be inserted"""
     objects: [cartItem_insert_input!]!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: cartItem_on_conflict
   ): cartItem_mutation_response
 
@@ -1080,7 +1264,7 @@ type mutation_root {
     """the row to be inserted"""
     object: cartItem_insert_input!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: cartItem_on_conflict
   ): cartItem
 
@@ -1091,7 +1275,7 @@ type mutation_root {
     """the rows to be inserted"""
     objects: [category_insert_input!]!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: category_on_conflict
   ): category_mutation_response
 
@@ -1102,7 +1286,7 @@ type mutation_root {
     """the row to be inserted"""
     object: category_insert_input!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: category_on_conflict
   ): category
 
@@ -1113,7 +1297,7 @@ type mutation_root {
     """the rows to be inserted"""
     objects: [menu_insert_input!]!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: menu_on_conflict
   ): menu_mutation_response
 
@@ -1124,7 +1308,7 @@ type mutation_root {
     """the row to be inserted"""
     object: menu_insert_input!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: menu_on_conflict
   ): menu
 
@@ -1135,7 +1319,7 @@ type mutation_root {
     """the rows to be inserted"""
     objects: [order_insert_input!]!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: order_on_conflict
   ): order_mutation_response
 
@@ -1146,9 +1330,31 @@ type mutation_root {
     """the row to be inserted"""
     object: order_insert_input!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: order_on_conflict
   ): order
+
+  """
+  insert data into the table: "reviews"
+  """
+  insert_reviews(
+    """the rows to be inserted"""
+    objects: [reviews_insert_input!]!
+
+    """upsert condition"""
+    on_conflict: reviews_on_conflict
+  ): reviews_mutation_response
+
+  """
+  insert a single row into the table: "reviews"
+  """
+  insert_reviews_one(
+    """the row to be inserted"""
+    object: reviews_insert_input!
+
+    """upsert condition"""
+    on_conflict: reviews_on_conflict
+  ): reviews
 
   """
   insert data into the table: "user"
@@ -1157,7 +1363,7 @@ type mutation_root {
     """the rows to be inserted"""
     objects: [user_insert_input!]!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: user_on_conflict
   ): user_mutation_response
 
@@ -1168,7 +1374,7 @@ type mutation_root {
     """the row to be inserted"""
     object: user_insert_input!
 
-    """on conflict condition"""
+    """upsert condition"""
     on_conflict: user_on_conflict
   ): user
   orderCartItems: OrderCartItemsOutput
@@ -1203,6 +1409,14 @@ type mutation_root {
   ): cartItem
 
   """
+  update multiples rows of table: "cartItem"
+  """
+  update_cartItem_many(
+    """updates to execute, in order"""
+    updates: [cartItem_updates!]!
+  ): [cartItem_mutation_response]
+
+  """
   update data of the table: "category"
   """
   update_category(
@@ -1221,6 +1435,14 @@ type mutation_root {
     _set: category_set_input
     pk_columns: category_pk_columns_input!
   ): category
+
+  """
+  update multiples rows of table: "category"
+  """
+  update_category_many(
+    """updates to execute, in order"""
+    updates: [category_updates!]!
+  ): [category_mutation_response]
 
   """
   update data of the table: "menu"
@@ -1249,6 +1471,14 @@ type mutation_root {
   ): menu
 
   """
+  update multiples rows of table: "menu"
+  """
+  update_menu_many(
+    """updates to execute, in order"""
+    updates: [menu_updates!]!
+  ): [menu_mutation_response]
+
+  """
   update data of the table: "order"
   """
   update_order(
@@ -1275,6 +1505,48 @@ type mutation_root {
   ): order
 
   """
+  update multiples rows of table: "order"
+  """
+  update_order_many(
+    """updates to execute, in order"""
+    updates: [order_updates!]!
+  ): [order_mutation_response]
+
+  """
+  update data of the table: "reviews"
+  """
+  update_reviews(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: reviews_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: reviews_set_input
+
+    """filter the rows which have to be updated"""
+    where: reviews_bool_exp!
+  ): reviews_mutation_response
+
+  """
+  update single row of the table: "reviews"
+  """
+  update_reviews_by_pk(
+    """increments the numeric columns with given value of the filtered values"""
+    _inc: reviews_inc_input
+
+    """sets the columns of the filtered rows to the given values"""
+    _set: reviews_set_input
+    pk_columns: reviews_pk_columns_input!
+  ): reviews
+
+  """
+  update multiples rows of table: "reviews"
+  """
+  update_reviews_many(
+    """updates to execute, in order"""
+    updates: [reviews_updates!]!
+  ): [reviews_mutation_response]
+
+  """
   update data of the table: "user"
   """
   update_user(
@@ -1293,6 +1565,14 @@ type mutation_root {
     _set: user_set_input
     pk_columns: user_pk_columns_input!
   ): user
+
+  """
+  update multiples rows of table: "user"
+  """
+  update_user_many(
+    """updates to execute, in order"""
+    updates: [user_updates!]!
+  ): [user_mutation_response]
 }
 
 """
@@ -1309,6 +1589,9 @@ type order {
   orderedUserId: String!
   price: Int!
   quantity: Int!
+
+  """An object relationship"""
+  user: user!
 }
 
 """
@@ -1317,6 +1600,17 @@ aggregated selection of "order"
 type order_aggregate {
   aggregate: order_aggregate_fields
   nodes: [order!]!
+}
+
+input order_aggregate_bool_exp {
+  count: order_aggregate_bool_exp_count
+}
+
+input order_aggregate_bool_exp_count {
+  arguments: [order_select_column!]
+  distinct: Boolean
+  filter: order_bool_exp
+  predicate: Int_comparison_exp!
 }
 
 """
@@ -1359,7 +1653,7 @@ input type for inserting array relation for remote table "order"
 input order_arr_rel_insert_input {
   data: [order_insert_input!]!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: order_on_conflict
 }
 
@@ -1392,6 +1686,7 @@ input order_bool_exp {
   orderedUserId: String_comparison_exp
   price: Int_comparison_exp
   quantity: Int_comparison_exp
+  user: user_bool_exp
 }
 
 """column ordering options"""
@@ -1419,7 +1714,9 @@ enum order_by {
 unique or primary key constraints on table "order"
 """
 enum order_constraint {
-  """unique or primary key constraint"""
+  """
+  unique or primary key constraint on columns "id"
+  """
   order_pkey
 }
 
@@ -1443,6 +1740,7 @@ input order_insert_input {
   orderedUserId: String
   price: Int
   quantity: Int
+  user: user_obj_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -1505,7 +1803,7 @@ type order_mutation_response {
 }
 
 """
-on conflict condition type for table "order"
+on_conflict condition type for table "order"
 """
 input order_on_conflict {
   constraint: order_constraint!
@@ -1523,6 +1821,7 @@ input order_order_by {
   orderedUserId: order_by
   price: order_by
   quantity: order_by
+  user: user_order_by
 }
 
 """primary key columns input for table: order"""
@@ -1611,6 +1910,28 @@ input order_stddev_samp_order_by {
   quantity: order_by
 }
 
+"""
+Streaming cursor of the table "order"
+"""
+input order_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: order_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input order_stream_cursor_value_input {
+  id: uuid
+  menuId: uuid
+  name: String
+  orderedAt: timestamp
+  orderedUserId: String
+  price: Int
+  quantity: Int
+}
+
 """aggregate sum on columns"""
 type order_sum_fields {
   price: Int
@@ -1649,6 +1970,17 @@ enum order_update_column {
 
   """column name"""
   quantity
+}
+
+input order_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: order_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: order_set_input
+
+  """filter the rows which have to be updated"""
+  where: order_bool_exp!
 }
 
 """aggregate var_pop on columns"""
@@ -1870,6 +2202,45 @@ type query_root {
   """fetch data from the table: "order" using primary key columns"""
   order_by_pk(id: uuid!): order
 
+  """An array relationship"""
+  reviews(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): [reviews!]!
+
+  """An aggregate relationship"""
+  reviews_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): reviews_aggregate!
+
+  """fetch data from the table: "reviews" using primary key columns"""
+  reviews_by_pk(id: Int!): reviews
+
   """
   fetch data from the table: "user"
   """
@@ -1923,12 +2294,431 @@ type RemoveMenuFromCartOutput {
   success: Boolean!
 }
 
+"""
+columns and relationships of "reviews"
+"""
+type reviews {
+  comment: String!
+  createdAt: timestamptz!
+  id: Int!
+
+  """An object relationship"""
+  menu: menu!
+  menuId: uuid!
+  rating: Int!
+
+  """An object relationship"""
+  user: user!
+  userId: String!
+}
+
+"""
+aggregated selection of "reviews"
+"""
+type reviews_aggregate {
+  aggregate: reviews_aggregate_fields
+  nodes: [reviews!]!
+}
+
+input reviews_aggregate_bool_exp {
+  count: reviews_aggregate_bool_exp_count
+}
+
+input reviews_aggregate_bool_exp_count {
+  arguments: [reviews_select_column!]
+  distinct: Boolean
+  filter: reviews_bool_exp
+  predicate: Int_comparison_exp!
+}
+
+"""
+aggregate fields of "reviews"
+"""
+type reviews_aggregate_fields {
+  avg: reviews_avg_fields
+  count(columns: [reviews_select_column!], distinct: Boolean): Int!
+  max: reviews_max_fields
+  min: reviews_min_fields
+  stddev: reviews_stddev_fields
+  stddev_pop: reviews_stddev_pop_fields
+  stddev_samp: reviews_stddev_samp_fields
+  sum: reviews_sum_fields
+  var_pop: reviews_var_pop_fields
+  var_samp: reviews_var_samp_fields
+  variance: reviews_variance_fields
+}
+
+"""
+order by aggregate values of table "reviews"
+"""
+input reviews_aggregate_order_by {
+  avg: reviews_avg_order_by
+  count: order_by
+  max: reviews_max_order_by
+  min: reviews_min_order_by
+  stddev: reviews_stddev_order_by
+  stddev_pop: reviews_stddev_pop_order_by
+  stddev_samp: reviews_stddev_samp_order_by
+  sum: reviews_sum_order_by
+  var_pop: reviews_var_pop_order_by
+  var_samp: reviews_var_samp_order_by
+  variance: reviews_variance_order_by
+}
+
+"""
+input type for inserting array relation for remote table "reviews"
+"""
+input reviews_arr_rel_insert_input {
+  data: [reviews_insert_input!]!
+
+  """upsert condition"""
+  on_conflict: reviews_on_conflict
+}
+
+"""aggregate avg on columns"""
+type reviews_avg_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by avg() on columns of table "reviews"
+"""
+input reviews_avg_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""
+Boolean expression to filter rows from the table "reviews". All fields are combined with a logical 'AND'.
+"""
+input reviews_bool_exp {
+  _and: [reviews_bool_exp!]
+  _not: reviews_bool_exp
+  _or: [reviews_bool_exp!]
+  comment: String_comparison_exp
+  createdAt: timestamptz_comparison_exp
+  id: Int_comparison_exp
+  menu: menu_bool_exp
+  menuId: uuid_comparison_exp
+  rating: Int_comparison_exp
+  user: user_bool_exp
+  userId: String_comparison_exp
+}
+
+"""
+unique or primary key constraints on table "reviews"
+"""
+enum reviews_constraint {
+  """
+  unique or primary key constraint on columns "userId", "menuId"
+  """
+  reviews_menuId_userId_key
+
+  """
+  unique or primary key constraint on columns "id"
+  """
+  reviews_pkey
+}
+
+"""
+input type for incrementing numeric columns in table "reviews"
+"""
+input reviews_inc_input {
+  id: Int
+  rating: Int
+}
+
+"""
+input type for inserting data into table "reviews"
+"""
+input reviews_insert_input {
+  comment: String
+  createdAt: timestamptz
+  id: Int
+  menu: menu_obj_rel_insert_input
+  menuId: uuid
+  rating: Int
+  user: user_obj_rel_insert_input
+  userId: String
+}
+
+"""aggregate max on columns"""
+type reviews_max_fields {
+  comment: String
+  createdAt: timestamptz
+  id: Int
+  menuId: uuid
+  rating: Int
+  userId: String
+}
+
+"""
+order by max() on columns of table "reviews"
+"""
+input reviews_max_order_by {
+  comment: order_by
+  createdAt: order_by
+  id: order_by
+  menuId: order_by
+  rating: order_by
+  userId: order_by
+}
+
+"""aggregate min on columns"""
+type reviews_min_fields {
+  comment: String
+  createdAt: timestamptz
+  id: Int
+  menuId: uuid
+  rating: Int
+  userId: String
+}
+
+"""
+order by min() on columns of table "reviews"
+"""
+input reviews_min_order_by {
+  comment: order_by
+  createdAt: order_by
+  id: order_by
+  menuId: order_by
+  rating: order_by
+  userId: order_by
+}
+
+"""
+response of any mutation on the table "reviews"
+"""
+type reviews_mutation_response {
+  """number of rows affected by the mutation"""
+  affected_rows: Int!
+
+  """data from the rows affected by the mutation"""
+  returning: [reviews!]!
+}
+
+"""
+on_conflict condition type for table "reviews"
+"""
+input reviews_on_conflict {
+  constraint: reviews_constraint!
+  update_columns: [reviews_update_column!]! = []
+  where: reviews_bool_exp
+}
+
+"""Ordering options when selecting data from "reviews"."""
+input reviews_order_by {
+  comment: order_by
+  createdAt: order_by
+  id: order_by
+  menu: menu_order_by
+  menuId: order_by
+  rating: order_by
+  user: user_order_by
+  userId: order_by
+}
+
+"""primary key columns input for table: reviews"""
+input reviews_pk_columns_input {
+  id: Int!
+}
+
+"""
+select columns of table "reviews"
+"""
+enum reviews_select_column {
+  """column name"""
+  comment
+
+  """column name"""
+  createdAt
+
+  """column name"""
+  id
+
+  """column name"""
+  menuId
+
+  """column name"""
+  rating
+
+  """column name"""
+  userId
+}
+
+"""
+input type for updating data in table "reviews"
+"""
+input reviews_set_input {
+  comment: String
+  createdAt: timestamptz
+  id: Int
+  menuId: uuid
+  rating: Int
+  userId: String
+}
+
+"""aggregate stddev on columns"""
+type reviews_stddev_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by stddev() on columns of table "reviews"
+"""
+input reviews_stddev_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""aggregate stddev_pop on columns"""
+type reviews_stddev_pop_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by stddev_pop() on columns of table "reviews"
+"""
+input reviews_stddev_pop_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""aggregate stddev_samp on columns"""
+type reviews_stddev_samp_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by stddev_samp() on columns of table "reviews"
+"""
+input reviews_stddev_samp_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""
+Streaming cursor of the table "reviews"
+"""
+input reviews_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: reviews_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input reviews_stream_cursor_value_input {
+  comment: String
+  createdAt: timestamptz
+  id: Int
+  menuId: uuid
+  rating: Int
+  userId: String
+}
+
+"""aggregate sum on columns"""
+type reviews_sum_fields {
+  id: Int
+  rating: Int
+}
+
+"""
+order by sum() on columns of table "reviews"
+"""
+input reviews_sum_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""
+update columns of table "reviews"
+"""
+enum reviews_update_column {
+  """column name"""
+  comment
+
+  """column name"""
+  createdAt
+
+  """column name"""
+  id
+
+  """column name"""
+  menuId
+
+  """column name"""
+  rating
+
+  """column name"""
+  userId
+}
+
+input reviews_updates {
+  """increments the numeric columns with given value of the filtered values"""
+  _inc: reviews_inc_input
+
+  """sets the columns of the filtered rows to the given values"""
+  _set: reviews_set_input
+
+  """filter the rows which have to be updated"""
+  where: reviews_bool_exp!
+}
+
+"""aggregate var_pop on columns"""
+type reviews_var_pop_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by var_pop() on columns of table "reviews"
+"""
+input reviews_var_pop_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""aggregate var_samp on columns"""
+type reviews_var_samp_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by var_samp() on columns of table "reviews"
+"""
+input reviews_var_samp_order_by {
+  id: order_by
+  rating: order_by
+}
+
+"""aggregate variance on columns"""
+type reviews_variance_fields {
+  id: Float
+  rating: Float
+}
+
+"""
+order by variance() on columns of table "reviews"
+"""
+input reviews_variance_order_by {
+  id: order_by
+  rating: order_by
+}
+
 input SignInInput {
   id: String!
   password: String!
 }
 
 type SignInOutput {
+  id: String!
   token: String!
 }
 
@@ -1939,6 +2729,7 @@ input SignUpInput {
 }
 
 type SignUpOutput {
+  id: String!
   token: String!
 }
 
@@ -2040,6 +2831,20 @@ type subscription_root {
   cartItem_by_pk(id: uuid!): cartItem
 
   """
+  fetch data from the table in a streaming manner: "cartItem"
+  """
+  cartItem_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [cartItem_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: cartItem_bool_exp
+  ): [cartItem!]!
+
+  """
   fetch data from the table: "category"
   """
   category(
@@ -2081,6 +2886,20 @@ type subscription_root {
 
   """fetch data from the table: "category" using primary key columns"""
   category_by_pk(id: uuid!): category
+
+  """
+  fetch data from the table in a streaming manner: "category"
+  """
+  category_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [category_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: category_bool_exp
+  ): [category!]!
 
   """
   fetch data from the table: "menu"
@@ -2126,6 +2945,20 @@ type subscription_root {
   menu_by_pk(id: uuid!): menu
 
   """
+  fetch data from the table in a streaming manner: "menu"
+  """
+  menu_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [menu_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: menu_bool_exp
+  ): [menu!]!
+
+  """
   fetch data from the table: "order"
   """
   order(
@@ -2169,6 +3002,73 @@ type subscription_root {
   order_by_pk(id: uuid!): order
 
   """
+  fetch data from the table in a streaming manner: "order"
+  """
+  order_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [order_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: order_bool_exp
+  ): [order!]!
+
+  """An array relationship"""
+  reviews(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): [reviews!]!
+
+  """An aggregate relationship"""
+  reviews_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): reviews_aggregate!
+
+  """fetch data from the table: "reviews" using primary key columns"""
+  reviews_by_pk(id: Int!): reviews
+
+  """
+  fetch data from the table in a streaming manner: "reviews"
+  """
+  reviews_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [reviews_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): [reviews!]!
+
+  """
   fetch data from the table: "user"
   """
   user(
@@ -2210,6 +3110,20 @@ type subscription_root {
 
   """fetch data from the table: "user" using primary key columns"""
   user_by_pk(id: String!): user
+
+  """
+  fetch data from the table in a streaming manner: "user"
+  """
+  user_stream(
+    """maximum number of rows returned in a single batch"""
+    batch_size: Int!
+
+    """cursor to stream the results returned by the query"""
+    cursor: [user_stream_cursor_input]!
+
+    """filter the rows returned"""
+    where: user_bool_exp
+  ): [user!]!
 }
 
 scalar timestamp
@@ -2227,6 +3141,23 @@ input timestamp_comparison_exp {
   _lte: timestamp
   _neq: timestamp
   _nin: [timestamp!]
+}
+
+scalar timestamptz
+
+"""
+Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'.
+"""
+input timestamptz_comparison_exp {
+  _eq: timestamptz
+  _gt: timestamptz
+  _gte: timestamptz
+  _in: [timestamptz!]
+  _is_null: Boolean
+  _lt: timestamptz
+  _lte: timestamptz
+  _neq: timestamptz
+  _nin: [timestamptz!]
 }
 
 """
@@ -2270,7 +3201,79 @@ type user {
   ): cartItem_aggregate!
   id: String!
   name: String!
+
+  """An array relationship"""
+  orders(
+    """distinct select on columns"""
+    distinct_on: [order_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [order_order_by!]
+
+    """filter the rows returned"""
+    where: order_bool_exp
+  ): [order!]!
+
+  """An aggregate relationship"""
+  orders_aggregate(
+    """distinct select on columns"""
+    distinct_on: [order_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [order_order_by!]
+
+    """filter the rows returned"""
+    where: order_bool_exp
+  ): order_aggregate!
   password: String!
+
+  """An array relationship"""
+  reviews(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): [reviews!]!
+
+  """An aggregate relationship"""
+  reviews_aggregate(
+    """distinct select on columns"""
+    distinct_on: [reviews_select_column!]
+
+    """limit the number of rows returned"""
+    limit: Int
+
+    """skip the first n rows. Use only with order_by"""
+    offset: Int
+
+    """sort the rows by one or more columns"""
+    order_by: [reviews_order_by!]
+
+    """filter the rows returned"""
+    where: reviews_bool_exp
+  ): reviews_aggregate!
 }
 
 """
@@ -2298,16 +3301,23 @@ input user_bool_exp {
   _not: user_bool_exp
   _or: [user_bool_exp!]
   cartItems: cartItem_bool_exp
+  cartItems_aggregate: cartItem_aggregate_bool_exp
   id: String_comparison_exp
   name: String_comparison_exp
+  orders: order_bool_exp
+  orders_aggregate: order_aggregate_bool_exp
   password: String_comparison_exp
+  reviews: reviews_bool_exp
+  reviews_aggregate: reviews_aggregate_bool_exp
 }
 
 """
 unique or primary key constraints on table "user"
 """
 enum user_constraint {
-  """unique or primary key constraint"""
+  """
+  unique or primary key constraint on columns "id"
+  """
   users_pkey
 }
 
@@ -2318,7 +3328,9 @@ input user_insert_input {
   cartItems: cartItem_arr_rel_insert_input
   id: String
   name: String
+  orders: order_arr_rel_insert_input
   password: String
+  reviews: reviews_arr_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -2352,12 +3364,12 @@ input type for inserting object relation for remote table "user"
 input user_obj_rel_insert_input {
   data: user_insert_input!
 
-  """on conflict condition"""
+  """upsert condition"""
   on_conflict: user_on_conflict
 }
 
 """
-on conflict condition type for table "user"
+on_conflict condition type for table "user"
 """
 input user_on_conflict {
   constraint: user_constraint!
@@ -2370,7 +3382,9 @@ input user_order_by {
   cartItems_aggregate: cartItem_aggregate_order_by
   id: order_by
   name: order_by
+  orders_aggregate: order_aggregate_order_by
   password: order_by
+  reviews_aggregate: reviews_aggregate_order_by
 }
 
 """primary key columns input for table: user"""
@@ -2402,6 +3416,24 @@ input user_set_input {
 }
 
 """
+Streaming cursor of the table "user"
+"""
+input user_stream_cursor_input {
+  """Stream column input with initial value"""
+  initial_value: user_stream_cursor_value_input!
+
+  """cursor ordering"""
+  ordering: cursor_ordering
+}
+
+"""Initial value of the column from where the streaming should start"""
+input user_stream_cursor_value_input {
+  id: String
+  name: String
+  password: String
+}
+
+"""
 update columns of table "user"
 """
 enum user_update_column {
@@ -2413,6 +3445,14 @@ enum user_update_column {
 
   """column name"""
   password
+}
+
+input user_updates {
+  """sets the columns of the filtered rows to the given values"""
+  _set: user_set_input
+
+  """filter the rows which have to be updated"""
+  where: user_bool_exp!
 }
 
 scalar uuid
