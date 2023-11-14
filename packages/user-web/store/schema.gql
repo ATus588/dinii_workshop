@@ -744,42 +744,6 @@ type menu {
     where: order_bool_exp
   ): order_aggregate!
   price: Int!
-
-  """An array relationship"""
-  reviews(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): [reviews!]!
-
-  """An aggregate relationship"""
-  reviews_aggregate(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): reviews_aggregate!
 }
 
 """
@@ -874,8 +838,6 @@ input menu_bool_exp {
   orders: order_bool_exp
   orders_aggregate: order_aggregate_bool_exp
   price: Int_comparison_exp
-  reviews: reviews_bool_exp
-  reviews_aggregate: reviews_aggregate_bool_exp
 }
 
 """
@@ -907,7 +869,6 @@ input menu_insert_input {
   name: String
   orders: order_arr_rel_insert_input
   price: Int
-  reviews: reviews_arr_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -990,7 +951,6 @@ input menu_order_by {
   name: order_by
   orders_aggregate: order_aggregate_order_by
   price: order_by
-  reviews_aggregate: reviews_aggregate_order_by
 }
 
 """primary key columns input for table: menu"""
@@ -1221,19 +1181,6 @@ type mutation_root {
   delete_order_by_pk(id: uuid!): order
 
   """
-  delete data from the table: "reviews"
-  """
-  delete_reviews(
-    """filter the rows which have to be deleted"""
-    where: reviews_bool_exp!
-  ): reviews_mutation_response
-
-  """
-  delete single row from the table: "reviews"
-  """
-  delete_reviews_by_pk(id: Int!): reviews
-
-  """
   delete data from the table: "user"
   """
   delete_user(
@@ -1333,28 +1280,6 @@ type mutation_root {
     """upsert condition"""
     on_conflict: order_on_conflict
   ): order
-
-  """
-  insert data into the table: "reviews"
-  """
-  insert_reviews(
-    """the rows to be inserted"""
-    objects: [reviews_insert_input!]!
-
-    """upsert condition"""
-    on_conflict: reviews_on_conflict
-  ): reviews_mutation_response
-
-  """
-  insert a single row into the table: "reviews"
-  """
-  insert_reviews_one(
-    """the row to be inserted"""
-    object: reviews_insert_input!
-
-    """upsert condition"""
-    on_conflict: reviews_on_conflict
-  ): reviews
 
   """
   insert data into the table: "user"
@@ -1511,40 +1436,6 @@ type mutation_root {
     """updates to execute, in order"""
     updates: [order_updates!]!
   ): [order_mutation_response]
-
-  """
-  update data of the table: "reviews"
-  """
-  update_reviews(
-    """increments the numeric columns with given value of the filtered values"""
-    _inc: reviews_inc_input
-
-    """sets the columns of the filtered rows to the given values"""
-    _set: reviews_set_input
-
-    """filter the rows which have to be updated"""
-    where: reviews_bool_exp!
-  ): reviews_mutation_response
-
-  """
-  update single row of the table: "reviews"
-  """
-  update_reviews_by_pk(
-    """increments the numeric columns with given value of the filtered values"""
-    _inc: reviews_inc_input
-
-    """sets the columns of the filtered rows to the given values"""
-    _set: reviews_set_input
-    pk_columns: reviews_pk_columns_input!
-  ): reviews
-
-  """
-  update multiples rows of table: "reviews"
-  """
-  update_reviews_many(
-    """updates to execute, in order"""
-    updates: [reviews_updates!]!
-  ): [reviews_mutation_response]
 
   """
   update data of the table: "user"
@@ -2202,45 +2093,6 @@ type query_root {
   """fetch data from the table: "order" using primary key columns"""
   order_by_pk(id: uuid!): order
 
-  """An array relationship"""
-  reviews(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): [reviews!]!
-
-  """An aggregate relationship"""
-  reviews_aggregate(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): reviews_aggregate!
-
-  """fetch data from the table: "reviews" using primary key columns"""
-  reviews_by_pk(id: Int!): reviews
-
   """
   fetch data from the table: "user"
   """
@@ -2292,424 +2144,6 @@ input RemoveMenuFromCartInput {
 
 type RemoveMenuFromCartOutput {
   success: Boolean!
-}
-
-"""
-columns and relationships of "reviews"
-"""
-type reviews {
-  comment: String!
-  createdAt: timestamptz!
-  id: Int!
-
-  """An object relationship"""
-  menu: menu!
-  menuId: uuid!
-  rating: Int!
-
-  """An object relationship"""
-  user: user!
-  userId: String!
-}
-
-"""
-aggregated selection of "reviews"
-"""
-type reviews_aggregate {
-  aggregate: reviews_aggregate_fields
-  nodes: [reviews!]!
-}
-
-input reviews_aggregate_bool_exp {
-  count: reviews_aggregate_bool_exp_count
-}
-
-input reviews_aggregate_bool_exp_count {
-  arguments: [reviews_select_column!]
-  distinct: Boolean
-  filter: reviews_bool_exp
-  predicate: Int_comparison_exp!
-}
-
-"""
-aggregate fields of "reviews"
-"""
-type reviews_aggregate_fields {
-  avg: reviews_avg_fields
-  count(columns: [reviews_select_column!], distinct: Boolean): Int!
-  max: reviews_max_fields
-  min: reviews_min_fields
-  stddev: reviews_stddev_fields
-  stddev_pop: reviews_stddev_pop_fields
-  stddev_samp: reviews_stddev_samp_fields
-  sum: reviews_sum_fields
-  var_pop: reviews_var_pop_fields
-  var_samp: reviews_var_samp_fields
-  variance: reviews_variance_fields
-}
-
-"""
-order by aggregate values of table "reviews"
-"""
-input reviews_aggregate_order_by {
-  avg: reviews_avg_order_by
-  count: order_by
-  max: reviews_max_order_by
-  min: reviews_min_order_by
-  stddev: reviews_stddev_order_by
-  stddev_pop: reviews_stddev_pop_order_by
-  stddev_samp: reviews_stddev_samp_order_by
-  sum: reviews_sum_order_by
-  var_pop: reviews_var_pop_order_by
-  var_samp: reviews_var_samp_order_by
-  variance: reviews_variance_order_by
-}
-
-"""
-input type for inserting array relation for remote table "reviews"
-"""
-input reviews_arr_rel_insert_input {
-  data: [reviews_insert_input!]!
-
-  """upsert condition"""
-  on_conflict: reviews_on_conflict
-}
-
-"""aggregate avg on columns"""
-type reviews_avg_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by avg() on columns of table "reviews"
-"""
-input reviews_avg_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""
-Boolean expression to filter rows from the table "reviews". All fields are combined with a logical 'AND'.
-"""
-input reviews_bool_exp {
-  _and: [reviews_bool_exp!]
-  _not: reviews_bool_exp
-  _or: [reviews_bool_exp!]
-  comment: String_comparison_exp
-  createdAt: timestamptz_comparison_exp
-  id: Int_comparison_exp
-  menu: menu_bool_exp
-  menuId: uuid_comparison_exp
-  rating: Int_comparison_exp
-  user: user_bool_exp
-  userId: String_comparison_exp
-}
-
-"""
-unique or primary key constraints on table "reviews"
-"""
-enum reviews_constraint {
-  """
-  unique or primary key constraint on columns "userId", "menuId"
-  """
-  reviews_menuId_userId_key
-
-  """
-  unique or primary key constraint on columns "id"
-  """
-  reviews_pkey
-}
-
-"""
-input type for incrementing numeric columns in table "reviews"
-"""
-input reviews_inc_input {
-  id: Int
-  rating: Int
-}
-
-"""
-input type for inserting data into table "reviews"
-"""
-input reviews_insert_input {
-  comment: String
-  createdAt: timestamptz
-  id: Int
-  menu: menu_obj_rel_insert_input
-  menuId: uuid
-  rating: Int
-  user: user_obj_rel_insert_input
-  userId: String
-}
-
-"""aggregate max on columns"""
-type reviews_max_fields {
-  comment: String
-  createdAt: timestamptz
-  id: Int
-  menuId: uuid
-  rating: Int
-  userId: String
-}
-
-"""
-order by max() on columns of table "reviews"
-"""
-input reviews_max_order_by {
-  comment: order_by
-  createdAt: order_by
-  id: order_by
-  menuId: order_by
-  rating: order_by
-  userId: order_by
-}
-
-"""aggregate min on columns"""
-type reviews_min_fields {
-  comment: String
-  createdAt: timestamptz
-  id: Int
-  menuId: uuid
-  rating: Int
-  userId: String
-}
-
-"""
-order by min() on columns of table "reviews"
-"""
-input reviews_min_order_by {
-  comment: order_by
-  createdAt: order_by
-  id: order_by
-  menuId: order_by
-  rating: order_by
-  userId: order_by
-}
-
-"""
-response of any mutation on the table "reviews"
-"""
-type reviews_mutation_response {
-  """number of rows affected by the mutation"""
-  affected_rows: Int!
-
-  """data from the rows affected by the mutation"""
-  returning: [reviews!]!
-}
-
-"""
-on_conflict condition type for table "reviews"
-"""
-input reviews_on_conflict {
-  constraint: reviews_constraint!
-  update_columns: [reviews_update_column!]! = []
-  where: reviews_bool_exp
-}
-
-"""Ordering options when selecting data from "reviews"."""
-input reviews_order_by {
-  comment: order_by
-  createdAt: order_by
-  id: order_by
-  menu: menu_order_by
-  menuId: order_by
-  rating: order_by
-  user: user_order_by
-  userId: order_by
-}
-
-"""primary key columns input for table: reviews"""
-input reviews_pk_columns_input {
-  id: Int!
-}
-
-"""
-select columns of table "reviews"
-"""
-enum reviews_select_column {
-  """column name"""
-  comment
-
-  """column name"""
-  createdAt
-
-  """column name"""
-  id
-
-  """column name"""
-  menuId
-
-  """column name"""
-  rating
-
-  """column name"""
-  userId
-}
-
-"""
-input type for updating data in table "reviews"
-"""
-input reviews_set_input {
-  comment: String
-  createdAt: timestamptz
-  id: Int
-  menuId: uuid
-  rating: Int
-  userId: String
-}
-
-"""aggregate stddev on columns"""
-type reviews_stddev_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by stddev() on columns of table "reviews"
-"""
-input reviews_stddev_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""aggregate stddev_pop on columns"""
-type reviews_stddev_pop_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by stddev_pop() on columns of table "reviews"
-"""
-input reviews_stddev_pop_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""aggregate stddev_samp on columns"""
-type reviews_stddev_samp_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by stddev_samp() on columns of table "reviews"
-"""
-input reviews_stddev_samp_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""
-Streaming cursor of the table "reviews"
-"""
-input reviews_stream_cursor_input {
-  """Stream column input with initial value"""
-  initial_value: reviews_stream_cursor_value_input!
-
-  """cursor ordering"""
-  ordering: cursor_ordering
-}
-
-"""Initial value of the column from where the streaming should start"""
-input reviews_stream_cursor_value_input {
-  comment: String
-  createdAt: timestamptz
-  id: Int
-  menuId: uuid
-  rating: Int
-  userId: String
-}
-
-"""aggregate sum on columns"""
-type reviews_sum_fields {
-  id: Int
-  rating: Int
-}
-
-"""
-order by sum() on columns of table "reviews"
-"""
-input reviews_sum_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""
-update columns of table "reviews"
-"""
-enum reviews_update_column {
-  """column name"""
-  comment
-
-  """column name"""
-  createdAt
-
-  """column name"""
-  id
-
-  """column name"""
-  menuId
-
-  """column name"""
-  rating
-
-  """column name"""
-  userId
-}
-
-input reviews_updates {
-  """increments the numeric columns with given value of the filtered values"""
-  _inc: reviews_inc_input
-
-  """sets the columns of the filtered rows to the given values"""
-  _set: reviews_set_input
-
-  """filter the rows which have to be updated"""
-  where: reviews_bool_exp!
-}
-
-"""aggregate var_pop on columns"""
-type reviews_var_pop_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by var_pop() on columns of table "reviews"
-"""
-input reviews_var_pop_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""aggregate var_samp on columns"""
-type reviews_var_samp_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by var_samp() on columns of table "reviews"
-"""
-input reviews_var_samp_order_by {
-  id: order_by
-  rating: order_by
-}
-
-"""aggregate variance on columns"""
-type reviews_variance_fields {
-  id: Float
-  rating: Float
-}
-
-"""
-order by variance() on columns of table "reviews"
-"""
-input reviews_variance_order_by {
-  id: order_by
-  rating: order_by
 }
 
 input SignInInput {
@@ -3015,59 +2449,6 @@ type subscription_root {
     where: order_bool_exp
   ): [order!]!
 
-  """An array relationship"""
-  reviews(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): [reviews!]!
-
-  """An aggregate relationship"""
-  reviews_aggregate(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): reviews_aggregate!
-
-  """fetch data from the table: "reviews" using primary key columns"""
-  reviews_by_pk(id: Int!): reviews
-
-  """
-  fetch data from the table in a streaming manner: "reviews"
-  """
-  reviews_stream(
-    """maximum number of rows returned in a single batch"""
-    batch_size: Int!
-
-    """cursor to stream the results returned by the query"""
-    cursor: [reviews_stream_cursor_input]!
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): [reviews!]!
-
   """
   fetch data from the table: "user"
   """
@@ -3141,23 +2522,6 @@ input timestamp_comparison_exp {
   _lte: timestamp
   _neq: timestamp
   _nin: [timestamp!]
-}
-
-scalar timestamptz
-
-"""
-Boolean expression to compare columns of type "timestamptz". All fields are combined with logical 'AND'.
-"""
-input timestamptz_comparison_exp {
-  _eq: timestamptz
-  _gt: timestamptz
-  _gte: timestamptz
-  _in: [timestamptz!]
-  _is_null: Boolean
-  _lt: timestamptz
-  _lte: timestamptz
-  _neq: timestamptz
-  _nin: [timestamptz!]
 }
 
 """
@@ -3238,42 +2602,6 @@ type user {
     where: order_bool_exp
   ): order_aggregate!
   password: String!
-
-  """An array relationship"""
-  reviews(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): [reviews!]!
-
-  """An aggregate relationship"""
-  reviews_aggregate(
-    """distinct select on columns"""
-    distinct_on: [reviews_select_column!]
-
-    """limit the number of rows returned"""
-    limit: Int
-
-    """skip the first n rows. Use only with order_by"""
-    offset: Int
-
-    """sort the rows by one or more columns"""
-    order_by: [reviews_order_by!]
-
-    """filter the rows returned"""
-    where: reviews_bool_exp
-  ): reviews_aggregate!
 }
 
 """
@@ -3307,8 +2635,6 @@ input user_bool_exp {
   orders: order_bool_exp
   orders_aggregate: order_aggregate_bool_exp
   password: String_comparison_exp
-  reviews: reviews_bool_exp
-  reviews_aggregate: reviews_aggregate_bool_exp
 }
 
 """
@@ -3330,7 +2656,6 @@ input user_insert_input {
   name: String
   orders: order_arr_rel_insert_input
   password: String
-  reviews: reviews_arr_rel_insert_input
 }
 
 """aggregate max on columns"""
@@ -3384,7 +2709,6 @@ input user_order_by {
   name: order_by
   orders_aggregate: order_aggregate_order_by
   password: order_by
-  reviews_aggregate: reviews_aggregate_order_by
 }
 
 """primary key columns input for table: user"""

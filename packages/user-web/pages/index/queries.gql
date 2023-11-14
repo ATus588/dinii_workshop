@@ -1,15 +1,3 @@
-query IndexGetReviewsByMenuId($menuId: uuid!) {
-  reviews(where: {menuId: {_eq: $menuId}}) {
-    user {
-      id
-      name
-    }
-    rating
-    createdAt
-    comment
-  }
-}
-
 query IndexGetCategoriesAndMenus {
   category {
     id
@@ -21,15 +9,6 @@ query IndexGetCategoriesAndMenus {
     name
     price
     image
-    reviews {
-      comment
-      createdAt
-      rating
-      user {
-        name
-        id
-      }
-    }
   }
 }
 

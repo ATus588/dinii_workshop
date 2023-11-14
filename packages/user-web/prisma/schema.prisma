@@ -22,6 +22,7 @@ model menu {
   category   category   @relation(fields: [categoryId], references: [id])
   cartItem   cartItem[]
   order      order[]
+  reviews    reviews[]
 }
 
 model user {
@@ -30,6 +31,7 @@ model user {
   password String
   cartItem cartItem[]
   order    order[]
+  reviews  reviews[]
 }
 
 model cartItem {
@@ -53,4 +55,17 @@ model order {
   price         Int
   menu          menu     @relation(fields: [menuId], references: [id])
   user          user     @relation(fields: [orderedUserId], references: [id])
+}
+
+model reviews {
+  id        Int      @id @default(autoincrement())
+  menuId    String   @db.Uuid
+  userId    String
+  rating    Int
+  comment   String
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  menu      menu     @relation(fields: [menuId], references: [id])
+  user      user     @relation(fields: [userId], references: [id])
+
+  @@unique([menuId, userId], name: "reviews_menuId_userId_key")
 }

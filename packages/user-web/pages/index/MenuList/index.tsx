@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { CartItem } from "hooks/useCartItems/types";
 import { useAuth } from "hooks/useAuth";
 
@@ -88,28 +88,6 @@ type Props = {
   onRemove: (menuId: string) => void;
 };
 
-type ReviewListProps = {
-  reviews: Array<{ comment: string, createdAt: string, rating: number, user: { name: string, id: string } } | null>,
-  close: () => void
-}
-
-
-const ReviewList = ({ reviews, close }: ReviewListProps) => {
-
-  if (reviews.length == 0) return <>No reviews yet</>
-  return (
-    <Reviews>
-      <button onClick={close}>Close</button>
-      {reviews.map((review) => (
-        <>
-          <div>{review?.user.name}</div>
-          <div>{review?.comment}</div>
-          <div>{review?.rating}</div>
-        </>
-      ))}
-    </Reviews>
-  )
-}
 
 export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
   const userId = useAuth().userId;
@@ -118,13 +96,6 @@ export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
     acc[menuId] = (acc[menuId] ?? 0) + quantity;
     return acc;
   }, {} as Record<string, number>);
-  const [open, setOpen] = useState(false)
-  const handleClose = () => {
-    setOpen(false)
-  }
-  const handleOpen = () => {
-    setOpen(true)
-  }
 
   return (
     <Container>
@@ -135,7 +106,7 @@ export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
               <StyledImage key={image} src={`http://localhost:3000/images/${image}`} width={160} height={160} alt={name} />
             </CardImage>
             <CardActions>
-              <CartActionButton onClick={() => handleOpen()}>
+              <CartActionButton>
                 <Visibility />
               </CartActionButton>
               <Spacer size={1} />
@@ -158,7 +129,6 @@ export const MenuList = ({ menus, cartItems, onAdd, onRemove }: Props) => {
           </Description>
         </Card>
       ))}
-      {open && <ReviewList reviews={[]} close={handleClose}/>}
     </Container>
   );
 };

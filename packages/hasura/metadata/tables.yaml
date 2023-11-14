@@ -2,179 +2,117 @@
     name: cartItem
     schema: public
   object_relationships:
-  - name: menu
-    using:
-      foreign_key_constraint_on: menuId
-  - name: user
-    using:
-      foreign_key_constraint_on: addedUserId
+    - name: menu
+      using:
+        foreign_key_constraint_on: menuId
+    - name: user
+      using:
+        foreign_key_constraint_on: addedUserId
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - menuId
-      - addedUserId
-      - name
-      - price
-      - quantity
-      filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - menuId
+          - addedUserId
+          - name
+          - price
+          - quantity
+        filter: {}
 - table:
     name: category
     schema: public
   array_relationships:
-  - name: menus
-    using:
-      foreign_key_constraint_on:
-        column: categoryId
-        table:
-          name: menu
-          schema: public
+    - name: menus
+      using:
+        foreign_key_constraint_on:
+          column: categoryId
+          table:
+            name: menu
+            schema: public
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+        filter: {}
 - table:
     name: menu
     schema: public
   object_relationships:
-  - name: category
-    using:
-      foreign_key_constraint_on: categoryId
+    - name: category
+      using:
+        foreign_key_constraint_on: categoryId
   array_relationships:
-  - name: cartItems
-    using:
-      foreign_key_constraint_on:
-        column: menuId
-        table:
-          name: cartItem
-          schema: public
-  - name: orders
-    using:
-      foreign_key_constraint_on:
-        column: menuId
-        table:
-          name: order
-          schema: public
-  - name: reviews
-    using:
-      foreign_key_constraint_on:
-        column: menuId
-        table:
-          name: reviews
-          schema: public
+    - name: cartItems
+      using:
+        foreign_key_constraint_on:
+          column: menuId
+          table:
+            name: cartItem
+            schema: public
+    - name: orders
+      using:
+        foreign_key_constraint_on:
+          column: menuId
+          table:
+            name: order
+            schema: public
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - categoryId
-      - name
-      - price
-      - image
-      filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - categoryId
+          - name
+          - price
+          - image
+        filter: {}
 - table:
     name: order
     schema: public
   object_relationships:
-  - name: menu
-    using:
-      foreign_key_constraint_on: menuId
-  - name: user
-    using:
-      foreign_key_constraint_on: orderedUserId
+    - name: menu
+      using:
+        foreign_key_constraint_on: menuId
+    - name: user
+      using:
+        foreign_key_constraint_on: orderedUserId
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - menuId
-      - orderedUserId
-      - name
-      - quantity
-      - orderedAt
-      - price
-      filter: {}
-- table:
-    name: reviews
-    schema: public
-  object_relationships:
-  - name: menu
-    using:
-      foreign_key_constraint_on: menuId
-  - name: user
-    using:
-      foreign_key_constraint_on: userId
-  insert_permissions:
-  - role: user
-    permission:
-      check: {}
-      columns:
-      - id
-      - menuId
-      - userId
-      - rating
-      - comment
-      - createdAt
-  select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - rating
-      - comment
-      - userId
-      - createdAt
-      - menuId
-      filter: {}
-  update_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - rating
-      - comment
-      - userId
-      - createdAt
-      - menuId
-      filter: {}
-      check: null
-  delete_permissions:
-  - role: user
-    permission:
-      filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - menuId
+          - orderedUserId
+          - name
+          - quantity
+          - orderedAt
+          - price
+        filter: {}
 - table:
     name: user
     schema: public
   array_relationships:
-  - name: cartItems
-    using:
-      foreign_key_constraint_on:
-        column: addedUserId
-        table:
-          name: cartItem
-          schema: public
-  - name: orders
-    using:
-      foreign_key_constraint_on:
-        column: orderedUserId
-        table:
-          name: order
-          schema: public
-  - name: reviews
-    using:
-      foreign_key_constraint_on:
-        column: userId
-        table:
-          name: reviews
-          schema: public
+    - name: cartItems
+      using:
+        foreign_key_constraint_on:
+          column: addedUserId
+          table:
+            name: cartItem
+            schema: public
+    - name: orders
+      using:
+        foreign_key_constraint_on:
+          column: orderedUserId
+          table:
+            name: order
+            schema: public
   select_permissions:
-  - role: user
-    permission:
-      columns:
-      - id
-      - name
-      filter: {}
+    - role: user
+      permission:
+        columns:
+          - id
+          - name
+        filter: {}
